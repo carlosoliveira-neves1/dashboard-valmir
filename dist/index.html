@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simplicio Advocacia - Relatorio de clientes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script type="module" crossorigin src="/assets/index-Ba8UgJVC.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DLyDGsMw.css">
+</head>
+<body>
+  <section id="loginView" class="auth-shell">
+    <form id="loginForm" class="auth-card">
+      <p class="auth-tag">Acesso Seguro</p>
+      <h1>Simplicio Advocacia - Relatorio de clientes</h1>
+      <p class="auth-text">Entre com seu usuário e senha para acessar o dashboard.</p>
+
+      <label class="field">
+        <span>Usuário</span>
+        <input id="loginUsername" type="text" autocomplete="username" required />
+      </label>
+
+      <label class="field">
+        <span>Senha</span>
+        <input id="loginPassword" type="password" autocomplete="current-password" required />
+      </label>
+
+      <button class="auth-btn" type="submit">Entrar</button>
+      <p id="loginMessage" class="auth-message"></p>
+      <p class="auth-hint">Primeiro acesso: usuário <strong>admin</strong> e senha <strong>admin123</strong>.</p>
+    </form>
+  </section>
+
+  <main id="appView" class="container hidden">
+    <header class="topbar">
+      <div>
+        <p class="topbar-brand">Simplicio Advocacia</p>
+        <p id="sessionInfo" class="topbar-user"></p>
+      </div>
+      <div class="topbar-actions">
+        <button id="adminToggle" class="topbar-btn hidden" type="button">Administração</button>
+        <button id="logoutBtn" class="topbar-btn alt" type="button">Sair</button>
+      </div>
+    </header>
+
+    <section id="adminSection" class="admin hidden">
+      <div class="admin-head">
+        <h2>Administração de usuários</h2>
+        <p>Crie usuários e controle permissões de acesso ao sistema.</p>
+      </div>
+
+      <form id="createUserForm" class="admin-form">
+        <label class="field">
+          <span>Novo usuário</span>
+          <input id="newUsername" type="text" required />
+        </label>
+
+        <label class="field">
+          <span>Senha</span>
+          <input id="newPassword" type="password" minlength="4" required />
+        </label>
+
+        <div class="permissions">
+          <label><input type="checkbox" name="permission" value="view_dashboard" checked /> Ver dashboard</label>
+          <label><input type="checkbox" name="permission" value="manage_users" /> Administrar usuários</label>
+        </div>
+
+        <button class="topbar-btn" type="submit">Criar usuário</button>
+      </form>
+      <p id="adminMessage" class="auth-message"></p>
+
+      <div class="table-wrapper">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Status</th>
+              <th>Permissões</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="accessDenied" class="filters hidden">
+      <div class="filter-head">
+        <h2>Acesso restrito</h2>
+      </div>
+      <p class="filter-result">Seu usuário não possui a permissão <strong>Ver dashboard</strong>. Solicite acesso ao administrador.</p>
+    </section>
+
+    <section id="dashboardArea">
+      <section class="hero">
+        <div>
+          <p class="hero-tag">Análise dinâmica em tempo real</p>
+          <h1>Simplicio Advocacia - Relatorio de clientes</h1>
+          <p class="hero-text">Faça upload do Excel e visualize relatórios automáticos, comparativos e tendências com um clique.</p>
+        </div>
+
+        <div class="hero-actions">
+          <label class="upload">
+            <input id="fileInput" type="file" accept=".xlsx,.xls" />
+            <span>Selecionar planilha</span>
+          </label>
+          <p id="fileName" class="file-name">Nenhum arquivo selecionado.</p>
+        </div>
+      </section>
+
+      <section id="kpis" class="kpis hidden"></section>
+
+      <section id="filters" class="filters hidden">
+        <div class="filter-head">
+          <h2>Filtros e Busca</h2>
+          <button id="clearFilters" type="button" class="clear-btn">Limpar filtros</button>
+        </div>
+        <div class="filter-grid">
+          <label class="field">
+            <span>Busca geral</span>
+            <input id="searchInput" type="text" placeholder="Digite CNPJ, empresa, título..." />
+          </label>
+
+          <label class="field">
+            <span>UF</span>
+            <select id="ufFilter">
+              <option value="">Todas</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Status / Situação</span>
+            <select id="statusFilter">
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Empresa</span>
+            <input id="companyFilter" type="text" list="companyList" placeholder="Selecione ou digite a empresa" />
+            <datalist id="companyList"></datalist>
+          </label>
+
+          <label class="field">
+            <span>Data inicial</span>
+            <input id="startDateFilter" type="date" />
+          </label>
+
+          <label class="field">
+            <span>Data final</span>
+            <input id="endDateFilter" type="date" />
+          </label>
+        </div>
+        <p id="filterResult" class="filter-result"></p>
+      </section>
+
+      <section id="insights" class="insights hidden"></section>
+
+      <section id="reports" class="reports hidden">
+        <article class="panel zoomable" data-chart-key="ufChart" data-title="Distribuição por UF">
+          <div class="panel-head"><h2>Distribuição por UF</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <canvas id="ufChart"></canvas>
+        </article>
+
+        <article class="panel zoomable" data-chart-key="statusChart" data-title="Status / Situação">
+          <div class="panel-head"><h2>Status / Situação</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <canvas id="statusChart"></canvas>
+        </article>
+
+        <article class="panel panel-wide zoomable" data-chart-key="timelineChart" data-title="Evolução Mensal de Registros">
+          <div class="panel-head"><h2>Evolução Mensal de Registros</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <canvas id="timelineChart"></canvas>
+        </article>
+
+        <article class="panel panel-wide zoomable" data-chart-key="monthlyValueChart" data-title="Evolução Mensal de Valor">
+          <div class="panel-head"><h2>Evolução Mensal de Valor</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <canvas id="monthlyValueChart"></canvas>
+        </article>
+
+        <article class="panel zoomable" data-chart-key="companyValueChart" data-title="Top Empresas por Valor">
+          <div class="panel-head"><h2>Top Empresas por Valor</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <canvas id="companyValueChart"></canvas>
+        </article>
+
+        <article class="panel zoomable" data-chart-key="ufValueChart" data-title="Valor Total por UF">
+          <div class="panel-head"><h2>Valor Total por UF</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <canvas id="ufValueChart"></canvas>
+        </article>
+
+        <article class="panel zoomable" data-chart-key="statusValueChart" data-title="Valor por Status">
+          <div class="panel-head"><h2>Valor por Status</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <canvas id="statusValueChart"></canvas>
+        </article>
+
+        <article class="panel zoomable" data-chart-key="valueRangeChart" data-title="Faixas de Valor Consolidado">
+          <div class="panel-head"><h2>Faixas de Valor Consolidado</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <canvas id="valueRangeChart"></canvas>
+        </article>
+
+        <article class="panel panel-wide zoomable table-panel" data-table="summaryTable" data-title="Resumo por Categoria">
+          <div class="panel-head"><h2>Resumo por Categoria</h2><button class="zoom-btn" type="button">Ampliar</button></div>
+          <div class="table-wrapper">
+            <table id="summaryTable">
+              <thead>
+                <tr><th>Categoria</th><th>Registros</th><th>%</th><th>Valor Acumulado</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <div id="zoomModal" class="modal hidden" aria-hidden="true">
+    <div id="modalBackdrop" class="modal-backdrop"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h3 id="modalTitle">Visualização Ampliada</h3>
+        <button id="closeModal" class="close-modal" type="button" aria-label="Fechar">×</button>
+      </div>
+      <div id="modalBody" class="modal-body"><canvas id="modalCanvas"></canvas></div>
+    </div>
+  </div>
+
+</body>
+</html>
